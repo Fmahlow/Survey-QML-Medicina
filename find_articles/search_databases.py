@@ -3,7 +3,9 @@ import argparse
 from search_arxiv import search_arxiv
 from search_ieee import search_ieee
 from search_pubmed import search_pubmed
+from search_scopus import search_scopus
 from search_springer import search_springer
+from search_webofscience import search_webofscience
 
 
 def run_selected_databases(databases):
@@ -12,6 +14,8 @@ def run_selected_databases(databases):
         "ieee": search_ieee,
         "springer": search_springer,
         "pubmed": search_pubmed,
+        "scopus": search_scopus,
+        "webofscience": search_webofscience,
     }
 
     for database in databases:
@@ -26,8 +30,8 @@ def parse_args():
     parser.add_argument(
         "--databases",
         nargs="+",
-        choices=["arxiv", "ieee", "springer", "pubmed"],
-        default=["arxiv", "ieee", "springer", "pubmed"],
+        choices=["arxiv", "ieee", "springer", "pubmed", "scopus", "webofscience"],
+        default=["arxiv", "ieee", "springer", "pubmed", "scopus", "webofscience"],
         help="Selecione quais bases consultar.",
     )
     return parser.parse_args()
