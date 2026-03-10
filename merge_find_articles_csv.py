@@ -73,16 +73,6 @@ def choose_link(row):
 
 
 def build_unique_key(row):
-    title_key = normalize_title(choose_title(row))
-    authors_key = normalize_authors(row.get("authors", ""))
-    year = infer_year(row)
-
-    if title_key and authors_key and year:
-        return f"title_authors_year:{title_key}:{authors_key}:{year}"
-
-    if title_key and authors_key:
-        return f"title_authors:{title_key}:{authors_key}"
-
     doi = normalize_doi(row.get("doi", ""))
     if doi:
         return f"doi:{doi}"
@@ -121,8 +111,26 @@ def load_csv(file_path):
     df["merged_title"] = df.apply(choose_title, axis=1)
     df["merged_year"] = df.apply(infer_year, axis=1)
     df["merged_link"] = df.apply(choose_link, axis=1)
+    df["normalized_title"] = df["merged_title"].apply(normalize_title)
+    df["normalized_authors"] = df.get("authors", "").apply(normalize_authors)
+    df["normalized_doi"] = df.get("doi", "").apply(normalize_doi)
     df["unique_key"] = df.apply(build_unique_key, axis=1)
     return df
+
+
+def dedupe_step(df, columns):
+    available = [column for column in columns if column in df.columns]
+    if len(available) != len(columns):
+        return df
+
+    mask = pd.Series(True, index=df.index)
+    for column in available:
+        mask &= df[column].astype(str).str.strip() != ""
+
+    matched = df[mask]
+    unmatched = df[~mask]
+    deduped = matched.drop_duplicates(subset=available, keep="first")
+    return pd.concat([deduped, unmatched], ignore_index=True, sort=False)
 
 
 def merge_csvs():
@@ -145,11 +153,19 @@ def merge_csvs():
 
     merged = pd.concat(frames, ignore_index=True, sort=False)
 
-    keyed = merged[merged["unique_key"] != ""].copy()
-    unkeyed = merged[merged["unique_key"] == ""].copy()
-
-    deduped = keyed.drop_duplicates(subset=["unique_key"], keep="first")
-    final_df = pd.concat([deduped, unkeyed], ignore_index=True, sort=False)
+    final_df = merged.copy()
+    final_df = dedupe_step(final_df, ["normalized_doi"])
+    final_df = dedupe_step(final_df, ["arxiv_id"])
+    final_df = dedupe_step(final_df, ["pmid"])
+    final_df = dedupe_step(final_df, ["article_number"])
+    final_df = dedupe_step(final_df, ["identifier"])
+    final_df = dedupe_step(final_df, ["wos_id"])
+    final_df = dedupe_step(final_df, ["scopus_id"])
+    final_df = dedupe_step(final_df, ["eid"])
+    final_df = dedupe_step(final_df, ["normalized_title", "normalized_authors", "merged_year"])
+    final_df = dedupe_step(final_df, ["normalized_title", "normalized_authors"])
+    final_df = dedupe_step(final_df, ["normalized_title", "merged_year"])
+    final_df = dedupe_step(final_df, ["normalized_title"])
 
     preferred_columns = [
         "source",
