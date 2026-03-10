@@ -7,30 +7,30 @@ from common import normalize_text, write_results
 
 
 SPRINGER_QUERIES = [
-    '"quantum machine learning" AND medicine',
-    '"quantum machine learning" AND medical',
-    '"quantum machine learning" AND healthcare',
-    '"variational quantum" AND medicine',
-    '"variational quantum" AND medical',
-    '"quantum neural network" AND medicine',
-    '"quantum neural network" AND medical',
-    '"quantum kernel" AND medicine',
-    '"quantum kernel" AND medical',
-    'QSVM AND medicine',
-    'QSVM AND medical',
-    '"quantum support vector machine" AND medicine',
-    '"quantum classifier" AND medicine',
-    '"parameterized quantum circuit" AND medicine',
-    '"quantum annealing" AND medicine',
-    'QAOA AND medicine',
-    '"drug discovery" AND "quantum machine learning"',
-    'genomics AND "quantum machine learning"',
-    'bioinformatics AND "quantum machine learning"',
-    'radiology AND "quantum machine learning"',
-    'imaging AND "quantum machine learning"',
-    'pathology AND "quantum machine learning"',
-    'ECG AND "quantum machine learning"',
-    'EEG AND "quantum machine learning"',
+    '"quantum machine learning" medicine',
+    '"quantum machine learning" medical',
+    '"quantum machine learning" healthcare',
+    '"variational quantum" medicine',
+    '"variational quantum" medical',
+    '"quantum neural network" medicine',
+    '"quantum neural network" medical',
+    '"quantum kernel" medicine',
+    '"quantum kernel" medical',
+    'QSVM medicine',
+    'QSVM medical',
+    '"quantum support vector machine" medicine',
+    '"quantum classifier" medicine',
+    '"parameterized quantum circuit" medicine',
+    '"quantum annealing" medicine',
+    'QAOA medicine',
+    '"drug discovery" "quantum machine learning"',
+    'genomics "quantum machine learning"',
+    'bioinformatics "quantum machine learning"',
+    'radiology "quantum machine learning"',
+    'imaging "quantum machine learning"',
+    'pathology "quantum machine learning"',
+    'ECG "quantum machine learning"',
+    'EEG "quantum machine learning"',
 ]
 
 
@@ -41,16 +41,16 @@ def raise_for_springer_error(response):
         raise RuntimeError(
             "Springer retornou 401 Unauthorized. A chave foi enviada, mas nao esta "
             "autorizada para este endpoint. Verifique se a chave esta ativa no "
-            "portal do Springer Nature e se corresponde a Open Access API. "
+            "portal do Springer Nature e se corresponde a Meta API. "
             f"Resposta: {detail}"
         )
     if response.status_code == 403:
         body = response.text.strip()
         detail = body[:300] if body else "sem corpo de resposta"
         raise RuntimeError(
-            "Springer retornou 403 Forbidden ao acessar a Open Access API. "
-            "Verifique se a chave usada pertence a Open Access API e se a conta "
-            "permite esse recurso. "
+            "Springer retornou 403 Forbidden ao acessar a Meta API. "
+            "A chave foi aceita, mas esta consulta especifica foi bloqueada. "
+            "Tente reduzir a query ou verificar limites do plano. "
             f"Resposta: {detail}"
         )
     response.raise_for_status()
@@ -64,7 +64,7 @@ def search_springer(queries=None, batch_size=100, sleep_seconds=1.0):
     if queries is None:
         queries = SPRINGER_QUERIES
 
-    base_url = "https://api.springernature.com/openaccess/json"
+    base_url = "https://api.springernature.com/meta/v2/json"
     rows = []
 
     for query in queries:
@@ -81,7 +81,12 @@ def search_springer(queries=None, batch_size=100, sleep_seconds=1.0):
                 },
                 timeout=60,
             )
-            raise_for_springer_error(response)
+            try:
+                raise_for_springer_error(response)
+            except RuntimeError as exc:
+                print(f"[springer] pulando query {query!r}: {exc}")
+                break
+
             payload = response.json()
             records = payload.get("records", [])
 
