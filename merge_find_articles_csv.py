@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -34,6 +35,10 @@ def infer_source(file_path):
         return "ieee"
     if "springer" in name:
         return "springer"
+    if "scopus" in name:
+        return "scopus"
+    if "webofscience" in name:
+        return "webofscience"
     return name
 
 
@@ -72,6 +77,11 @@ def build_unique_key(row):
         if value:
             return f"{column}:{value.lower()}"
 
+    for column in ("wos_id", "scopus_id", "eid"):
+        value = normalize_text(row.get(column, ""))
+        if value:
+            return f"{column}:{value.lower()}"
+
     title_key = normalize_title(choose_title(row))
     year = infer_year(row)
     if title_key and year:
@@ -83,9 +93,15 @@ def build_unique_key(row):
 
 
 def load_csv(file_path):
-    df = pd.read_csv(file_path)
+    try:
+        df = pd.read_csv(file_path)
+    except EmptyDataError:
+        print(f"[merge] ignorando CSV vazio: {file_path.name}")
+        return None
+
     if df.empty:
-        return df
+        print(f"[merge] ignorando CSV sem registros: {file_path.name}")
+        return None
 
     df["source"] = infer_source(file_path)
     df["origin_file"] = file_path.name
@@ -109,6 +125,11 @@ def merge_csvs():
         )
 
     frames = [load_csv(file_path) for file_path in csv_files]
+    frames = [frame for frame in frames if frame is not None]
+
+    if not frames:
+        raise RuntimeError("Todos os CSVs encontrados estao vazios ou sem colunas.")
+
     merged = pd.concat(frames, ignore_index=True, sort=False)
 
     keyed = merged[merged["unique_key"] != ""].copy()
