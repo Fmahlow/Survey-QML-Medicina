@@ -21,6 +21,11 @@ def normalize_title(value):
     return re.sub(r"[^a-z0-9]+", "", text)
 
 
+def normalize_authors(value):
+    text = normalize_text(value).lower()
+    return re.sub(r"[^a-z0-9,;]+", "", text)
+
+
 def normalize_doi(value):
     return normalize_text(value).lower()
 
@@ -68,6 +73,16 @@ def choose_link(row):
 
 
 def build_unique_key(row):
+    title_key = normalize_title(choose_title(row))
+    authors_key = normalize_authors(row.get("authors", ""))
+    year = infer_year(row)
+
+    if title_key and authors_key and year:
+        return f"title_authors_year:{title_key}:{authors_key}:{year}"
+
+    if title_key and authors_key:
+        return f"title_authors:{title_key}:{authors_key}"
+
     doi = normalize_doi(row.get("doi", ""))
     if doi:
         return f"doi:{doi}"
@@ -82,8 +97,6 @@ def build_unique_key(row):
         if value:
             return f"{column}:{value.lower()}"
 
-    title_key = normalize_title(choose_title(row))
-    year = infer_year(row)
     if title_key and year:
         return f"title_year:{title_key}:{year}"
     if title_key:
