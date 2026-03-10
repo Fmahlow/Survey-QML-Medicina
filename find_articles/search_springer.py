@@ -40,17 +40,17 @@ def raise_for_springer_error(response):
         detail = body[:300] if body else "sem corpo de resposta"
         raise RuntimeError(
             "Springer retornou 401 Unauthorized. A chave foi enviada, mas nao esta "
-            "autorizada para este endpoint/plano. Verifique se a chave esta ativa no "
-            "portal do Springer Nature e se o seu acesso cobre a Meta API. "
+            "autorizada para este endpoint. Verifique se a chave esta ativa no "
+            "portal do Springer Nature e se corresponde a Open Access API. "
             f"Resposta: {detail}"
         )
     if response.status_code == 403:
         body = response.text.strip()
         detail = body[:300] if body else "sem corpo de resposta"
         raise RuntimeError(
-            "Springer retornou 403 Forbidden. A chave foi aceita, mas esta consulta "
-            "foi bloqueada. Isso costuma acontecer com queries muito longas ou com "
-            "sintaxe booleana que a Meta API nao aceita bem. "
+            "Springer retornou 403 Forbidden ao acessar a Open Access API. "
+            "Verifique se a chave usada pertence a Open Access API e se a conta "
+            "permite esse recurso. "
             f"Resposta: {detail}"
         )
     response.raise_for_status()
@@ -64,7 +64,7 @@ def search_springer(queries=None, batch_size=100, sleep_seconds=1.0):
     if queries is None:
         queries = SPRINGER_QUERIES
 
-    base_url = "https://api.springernature.com/meta/v2/json"
+    base_url = "https://api.springernature.com/openaccess/json"
     rows = []
 
     for query in queries:
