@@ -3,10 +3,27 @@ import time
 
 import requests
 
-from common import BLOCK_MED, BLOCK_QML, normalize_text, write_results
+from common import normalize_text, write_results
 
 
-QUERY = f"({BLOCK_QML}) AND ({BLOCK_MED})"
+SCOPUS_QUERIES = [
+    'TITLE-ABS-KEY("quantum machine learning" AND medicine)',
+    'TITLE-ABS-KEY("quantum machine learning" AND medical)',
+    'TITLE-ABS-KEY("quantum machine learning" AND healthcare)',
+    'TITLE-ABS-KEY("variational quantum" AND medicine)',
+    'TITLE-ABS-KEY("quantum neural network" AND medicine)',
+    'TITLE-ABS-KEY("quantum kernel" AND medicine)',
+    'TITLE-ABS-KEY(QSVM AND medicine)',
+    'TITLE-ABS-KEY("quantum support vector machine" AND medicine)',
+    'TITLE-ABS-KEY("quantum circuit" AND medicine)',
+    'TITLE-ABS-KEY("parameterized quantum circuit" AND medicine)',
+    'TITLE-ABS-KEY("quantum annealing" AND medicine)',
+    'TITLE-ABS-KEY(QAOA AND medicine)',
+    'TITLE-ABS-KEY("quantum classifier" AND medicine)',
+    'TITLE-ABS-KEY("quantum machine learning" AND bioinformatics)',
+    'TITLE-ABS-KEY("quantum machine learning" AND genomics)',
+    'TITLE-ABS-KEY("quantum machine learning" AND imaging)',
+]
 
 
 def extract_authors(entry):
@@ -49,44 +66,68 @@ def parse_entry(entry):
     }
 
 
-def search_scopus(query=QUERY, batch_size=25, sleep_seconds=1.0):
+def raise_for_scopus_error(response):
+    if response.status_code == 400:
+        body = response.text.strip()
+        detail = body[:800] if body else "sem corpo de resposta"
+        raise RuntimeError(f"Scopus retornou 400 Bad Request. Resposta: {detail}")
+    if response.status_code in (401, 403, 429):
+        body = response.text.strip()
+        detail = body[:800] if body else "sem corpo de resposta"
+        raise RuntimeError(f"Scopus retornou {response.status_code}. Resposta: {detail}")
+    response.raise_for_status()
+
+
+def search_scopus(queries=None, batch_size=25, sleep_seconds=1.0):
     api_key = os.getenv("SCOPUS_API_KEY")
     if not api_key:
         raise RuntimeError("Defina a variável de ambiente SCOPUS_API_KEY.")
 
+    if queries is None:
+        queries = SCOPUS_QUERIES
+
     base_url = "https://api.elsevier.com/content/search/scopus"
-    start = 0
     rows = []
 
-    while True:
-        response = requests.get(
-            base_url,
-            headers={
-                "X-ELS-APIKey": api_key,
-                "Accept": "application/json",
-            },
-            params={
-                "query": query,
-                "start": start,
-                "count": batch_size,
-            },
-            timeout=60,
-        )
-        response.raise_for_status()
-        payload = response.json().get("search-results", {})
-        entries = payload.get("entry", [])
+    for query in queries:
+        start = 0
 
-        if not entries:
-            break
+        while True:
+            response = requests.get(
+                base_url,
+                headers={
+                    "X-ELS-APIKey": api_key,
+                    "Accept": "application/json",
+                },
+                params={
+                    "query": query,
+                    "start": start,
+                    "count": batch_size,
+                },
+                timeout=60,
+            )
+            try:
+                raise_for_scopus_error(response)
+            except RuntimeError as exc:
+                print(f"[scopus] pulando query {query!r}: {exc}")
+                break
 
-        for entry in entries:
-            rows.append(parse_entry(entry))
+            payload = response.json().get("search-results", {})
+            entries = payload.get("entry", [])
 
-        if len(entries) < batch_size:
-            break
+            if not entries:
+                break
 
-        start += len(entries)
-        time.sleep(sleep_seconds)
+            for entry in entries:
+                parsed = parse_entry(entry)
+                parsed["search_query"] = query
+                rows.append(parsed)
+
+            if len(entries) < batch_size:
+                break
+
+            start += len(entries)
+            time.sleep(sleep_seconds)
 
     return write_results(rows, ["scopus_id", "eid", "doi"], "scopus_QML_medicine_results.csv")
 
