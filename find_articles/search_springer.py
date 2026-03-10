@@ -7,31 +7,53 @@ from common import normalize_text, write_results
 
 
 SPRINGER_QUERIES = [
-    '"quantum machine learning" medicine',
-    '"quantum machine learning" medical',
-    '"quantum machine learning" healthcare',
-    '"variational quantum" medicine',
-    '"variational quantum" medical',
-    '"quantum neural network" medicine',
-    '"quantum neural network" medical',
-    '"quantum kernel" medicine',
-    '"quantum kernel" medical',
-    'QSVM medicine',
-    'QSVM medical',
-    '"quantum support vector machine" medicine',
-    '"quantum classifier" medicine',
-    '"parameterized quantum circuit" medicine',
-    '"quantum annealing" medicine',
-    'QAOA medicine',
-    '"drug discovery" "quantum machine learning"',
-    'genomics "quantum machine learning"',
-    'bioinformatics "quantum machine learning"',
-    'radiology "quantum machine learning"',
-    'imaging "quantum machine learning"',
-    'pathology "quantum machine learning"',
-    'ECG "quantum machine learning"',
-    'EEG "quantum machine learning"',
+    '"quantum machine learning"',
+    '"variational quantum"',
+    '"quantum neural network"',
+    '"quantum kernel"',
+    'QSVM',
+    '"quantum support vector machine"',
+    '"quantum classifier"',
+    '"parameterized quantum circuit"',
+    '"quantum annealing"',
+    'QAOA',
 ]
+
+MEDICAL_TERMS = [
+    "medicine",
+    "medical",
+    "healthcare",
+    "clinical",
+    "diagnosis",
+    "prognosis",
+    "radiology",
+    "imaging",
+    "mri",
+    "ct",
+    "ultrasound",
+    "pathology",
+    "histopathology",
+    "ecg",
+    "eeg",
+    "genomics",
+    "proteomics",
+    "bioinformatics",
+    "electronic health record",
+    "ehr",
+    "drug",
+    "pharmacology",
+]
+
+
+def is_medical_record(record):
+    fields = [
+        record.get("title", ""),
+        record.get("abstract", ""),
+        " ".join(record.get("keyword", [])),
+        " ".join(record.get("subjects", [])),
+    ]
+    haystack = " ".join(normalize_text(field).lower() for field in fields)
+    return any(term in haystack for term in MEDICAL_TERMS)
 
 
 def raise_for_springer_error(response):
@@ -94,6 +116,9 @@ def search_springer(queries=None, batch_size=100, sleep_seconds=1.0):
                 break
 
             for record in records:
+                if not is_medical_record(record):
+                    continue
+
                 creators = record.get("creators", [])
                 rows.append(
                     {
