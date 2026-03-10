@@ -22,6 +22,8 @@ HEALTH_BLOCK = (
 )
 
 QUERY = f"({QML_BLOCK}) AND ({HEALTH_BLOCK})"
+DEFAULT_MAX_REQUESTS = 50
+DEFAULT_MAX_RECORDS = 5000
 
 
 def raise_for_springer_error(response):
@@ -29,19 +31,60 @@ def raise_for_springer_error(response):
         body = response.text.strip()
         detail = body[:500] if body else "sem corpo de resposta"
         raise RuntimeError(f"Springer retornou {response.status_code}. Resposta: {detail}")
+    if response.status_code == 429:
+        body = response.text.strip()
+        detail = body[:500] if body else "sem corpo de resposta"
+        raise RuntimeError(f"Springer retornou 429 Too Many Requests. Resposta: {detail}")
     response.raise_for_status()
 
 
-def search_springer(query=QUERY, batch_size=10, sleep_seconds=1.0):
+def extract_total_records(payload):
+    result = payload.get("result", [])
+    if not result:
+        return 0
+
+    total = result[0].get("total", 0)
+    try:
+        return int(total)
+    except (TypeError, ValueError):
+        return 0
+
+
+def search_springer(
+    query=QUERY,
+    batch_size=100,
+    sleep_seconds=1.0,
+    max_requests=DEFAULT_MAX_REQUESTS,
+    max_records=DEFAULT_MAX_RECORDS,
+):
     api_key = os.getenv("SPRINGER_API_KEY")
     if not api_key:
         raise RuntimeError("Defina a variável de ambiente SPRINGER_API_KEY.")
 
+    max_requests = int(os.getenv("SPRINGER_MAX_REQUESTS", max_requests))
+    max_records = int(os.getenv("SPRINGER_MAX_RECORDS", max_records))
     base_url = "https://api.springernature.com/meta/v2/json"
     start = 1
     rows = []
+    request_count = 0
+    total_records = None
 
     while True:
+        if request_count >= max_requests:
+            print(
+                f"[springer] limite de requisicoes por execucao atingido "
+                f"({request_count}/{max_requests}). Encerrando antes de consumir "
+                "mais da cota diaria."
+            )
+            break
+
+        if len(rows) >= max_records:
+            print(
+                f"[springer] limite de registros por execucao atingido "
+                f"({len(rows)}/{max_records})."
+            )
+            break
+
         response = requests.get(
             base_url,
             params={
@@ -52,9 +95,18 @@ def search_springer(query=QUERY, batch_size=10, sleep_seconds=1.0):
             },
             timeout=60,
         )
+        request_count += 1
         raise_for_springer_error(response)
         payload = response.json()
         records = payload.get("records", [])
+
+        if total_records is None:
+            total_records = extract_total_records(payload)
+            if total_records:
+                print(
+                    f"[springer] total estimado: {total_records} registros; "
+                    f"pagina: {batch_size}; teto de requisicoes: {max_requests}."
+                )
 
         if not records:
             break
@@ -76,7 +128,20 @@ def search_springer(query=QUERY, batch_size=10, sleep_seconds=1.0):
                 }
             )
 
+            if len(rows) >= max_records:
+                break
+
+        if len(rows) >= max_records:
+            print(
+                f"[springer] coleta interrompida ao atingir o teto de "
+                f"{max_records} registros."
+            )
+            break
+
         start += len(records)
+        if total_records and start > total_records:
+            break
+
         time.sleep(sleep_seconds)
 
     return write_results(rows, ["identifier", "doi"], "springer_QML_medicine_results.csv")
