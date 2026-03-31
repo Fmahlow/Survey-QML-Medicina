@@ -23,18 +23,14 @@ HEALTH_BLOCK = (
 
 QUERY = f"({QML_BLOCK}) AND ({HEALTH_BLOCK})"
 DEFAULT_MAX_REQUESTS = 20
-DEFAULT_MAX_RECORDS = 5000
+DEFAULT_MAX_RECORDS = 100
 
 
 def raise_for_springer_error(response):
-    if response.status_code in (401, 403):
+    if response.status_code in (401, 403, 429):
         body = response.text.strip()
         detail = body[:500] if body else "sem corpo de resposta"
         raise RuntimeError(f"Springer retornou {response.status_code}. Resposta: {detail}")
-    if response.status_code == 429:
-        body = response.text.strip()
-        detail = body[:500] if body else "sem corpo de resposta"
-        raise RuntimeError(f"Springer retornou 429 Too Many Requests. Resposta: {detail}")
     response.raise_for_status()
 
 
@@ -74,16 +70,12 @@ def search_springer(
         if request_count >= max_requests:
             print(
                 f"[springer] limite de requisicoes por execucao atingido "
-                f"({request_count}/{max_requests}). Encerrando antes de consumir "
-                "mais da cota diaria."
+                f"({request_count}/{max_requests})."
             )
             break
 
         if len(rows) >= max_records:
-            print(
-                f"[springer] limite de registros por execucao atingido "
-                f"({len(rows)}/{max_records})."
-            )
+            print(f"[springer] limite de registros por execucao atingido ({len(rows)}/{max_records}).")
             break
 
         response = requests.get(
@@ -133,10 +125,7 @@ def search_springer(
                 break
 
         if len(rows) >= max_records:
-            print(
-                f"[springer] coleta interrompida ao atingir o teto de "
-                f"{max_records} registros."
-            )
+            print(f"[springer] coleta interrompida ao atingir o teto de {max_records} registros.")
             break
 
         start += len(records)
