@@ -73,6 +73,8 @@ def choose_link(row):
 
 
 def build_unique_key(row):
+    title_key = normalize_title(choose_title(row))
+    year = infer_year(row)
     doi = normalize_doi(row.get("doi", ""))
     if doi:
         return f"doi:{doi}"
@@ -111,9 +113,13 @@ def load_csv(file_path):
     df["merged_title"] = df.apply(choose_title, axis=1)
     df["merged_year"] = df.apply(infer_year, axis=1)
     df["merged_link"] = df.apply(choose_link, axis=1)
+    if "authors" not in df.columns:
+        df["authors"] = ""
+    if "doi" not in df.columns:
+        df["doi"] = ""
     df["normalized_title"] = df["merged_title"].apply(normalize_title)
-    df["normalized_authors"] = df.get("authors", "").apply(normalize_authors)
-    df["normalized_doi"] = df.get("doi", "").apply(normalize_doi)
+    df["normalized_authors"] = df["authors"].apply(normalize_authors)
+    df["normalized_doi"] = df["doi"].apply(normalize_doi)
     df["unique_key"] = df.apply(build_unique_key, axis=1)
     return df
 
@@ -125,7 +131,7 @@ def dedupe_step(df, columns):
 
     mask = pd.Series(True, index=df.index)
     for column in available:
-        mask &= df[column].astype(str).str.strip() != ""
+        mask &= df[column].fillna("").astype(str).str.strip() != ""
 
     matched = df[mask]
     unmatched = df[~mask]

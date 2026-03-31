@@ -22,7 +22,7 @@ HEALTH_BLOCK = (
 )
 
 QUERY = f"({QML_BLOCK}) AND ({HEALTH_BLOCK})"
-DEFAULT_MAX_REQUESTS = 50
+DEFAULT_MAX_REQUESTS = 20
 DEFAULT_MAX_RECORDS = 5000
 
 
@@ -52,7 +52,7 @@ def extract_total_records(payload):
 
 def search_springer(
     query=QUERY,
-    batch_size=100,
+    batch_size=10,
     sleep_seconds=1.0,
     max_requests=DEFAULT_MAX_REQUESTS,
     max_records=DEFAULT_MAX_RECORDS,
@@ -63,6 +63,7 @@ def search_springer(
 
     max_requests = int(os.getenv("SPRINGER_MAX_REQUESTS", max_requests))
     max_records = int(os.getenv("SPRINGER_MAX_RECORDS", max_records))
+    batch_size = int(os.getenv("SPRINGER_BATCH_SIZE", batch_size))
     base_url = "https://api.springernature.com/meta/v2/json"
     start = 1
     rows = []
