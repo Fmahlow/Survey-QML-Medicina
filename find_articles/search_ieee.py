@@ -9,10 +9,35 @@ from common import BLOCK_MED, BLOCK_QML, normalize_text, write_results
 QUERY = f"({BLOCK_QML}) AND ({BLOCK_MED})"
 
 
+def _check_api_key(api_key):
+    """Faz uma requisição mínima para validar a chave antes de iniciar a coleta."""
+    response = requests.get(
+        "https://ieeexploreapi.ieee.org/api/v1/search/articles",
+        params={"apikey": api_key, "querytext": "quantum", "max_records": 1, "format": "json"},
+        timeout=30,
+    )
+    if response.status_code == 403:
+        raise RuntimeError(
+            "IEEE retornou 403 Forbidden.\n"
+            "Possíveis causas:\n"
+            "  1. Chave inválida ou ainda não aprovada — verifique pasta de spam e aguarde\n"
+            "     até 24 h após o cadastro em https://developer.ieee.org/\n"
+            "  2. Conta ainda pendente de aprovação manual pela IEEE.\n"
+            "Se o e-mail de confirmação não chegou:\n"
+            "  - Tente reenviar em https://developer.ieee.org/ (opção 'Resend verification')\n"
+            "  - Ou contate xploreapi@ieee.org informando seu e-mail de cadastro."
+        )
+    if response.status_code == 401:
+        raise RuntimeError("IEEE retornou 401: chave de API incorreta.")
+    response.raise_for_status()
+
+
 def search_ieee(query=QUERY, batch_size=200, sleep_seconds=1.0):
     api_key = os.getenv("IEEE_API_KEY")
     if not api_key:
         raise RuntimeError("Defina a variável de ambiente IEEE_API_KEY.")
+
+    _check_api_key(api_key)
 
     base_url = "https://ieeexploreapi.ieee.org/api/v1/search/articles"
     start_record = 1
@@ -32,6 +57,8 @@ def search_ieee(query=QUERY, batch_size=200, sleep_seconds=1.0):
         )
         response.raise_for_status()
         payload = response.json()
+
+        total_records = payload.get("total_records", 0)
         articles = payload.get("articles", [])
 
         if not articles:
@@ -44,7 +71,7 @@ def search_ieee(query=QUERY, batch_size=200, sleep_seconds=1.0):
                     "article_number": article.get("article_number", ""),
                     "title": normalize_text(article.get("title")),
                     "authors": ", ".join(
-                        author.get("full_name", "") for author in authors if author.get("full_name")
+                        a.get("full_name", "") for a in authors if a.get("full_name")
                     ),
                     "publication_year": article.get("publication_year", ""),
                     "publication_title": article.get("publication_title", ""),
@@ -54,6 +81,11 @@ def search_ieee(query=QUERY, batch_size=200, sleep_seconds=1.0):
                     "pdf_url": article.get("pdf_url", ""),
                 }
             )
+
+        print(f"[ieee] {len(rows)}/{total_records} artigos coletados…")
+
+        if len(rows) >= total_records:
+            break
 
         start_record += len(articles)
         time.sleep(sleep_seconds)
