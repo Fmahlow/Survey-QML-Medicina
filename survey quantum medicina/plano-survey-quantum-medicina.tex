@@ -1,0 +1,133 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{xcolor}
+
+% Plano de organização — Survey em Computação Quântica aplicada à Medicina
+% (arquivo de trabalho; você pode marcar itens e mover datas conforme necessário)
+
+\begin{document}
+
+\section*{Plano de trabalho — Survey em CQ aplicada à Medicina}
+
+\section{Cronograma}
+
+% Dica: ajuste os rótulos (M1..M6) para semanas/meses conforme sua necessidade.
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.46\linewidth}|*{6}{c|}}
+\hline
+\textbf{Atividade} & \textbf{M1} & \textbf{M2} & \textbf{M3} & \textbf{M4} & \textbf{M5} & \textbf{M6} \\
+\hline
+\textbf{Frente 1 --- Survey em Computação Quântica Aplicada à Medicina}
+& X & X & X & X & X & X \\
+\hline
+Definição do escopo, palavras-chave e critérios de inclusão/exclusão
+& X & & & & & \\
+Levantamento bibliográfico sistemático (arXiv, IEEE, Springer, PubMed)
+& & X & X & X & & \\
+Classificação dos trabalhos e análise por subárea
+& & & X & X & & \\
+Análise técnica de algoritmos e arquiteturas quânticas
+& & & & X & X & \\
+Mapeamento de limitações e desafios abertos
+& & & & & X & X \\
+Síntese crítica e redação do artigo de survey
+& & & & & & X \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Checklist incremental}
+
+% Convenção sugerida:
+% [ ] a fazer  |  [~] em andamento  |  [x] feito
+
+\subsection{Definição do escopo, palavras-chave e critérios de inclusão/exclusão}
+\begin{itemize}
+  \item [ ] Definir o objetivo do survey em 3--5 frases (o que entra / o que não entra). \textcolor{blue}{Objetivo: mapear e sintetizar criticamente como técnicas de \emph{quantum machine learning} (QML) vêm sendo aplicadas em problemas médicos (diagnóstico, prognóstico, descoberta de fármacos, bioinformática, análise de sinais e imagens, suporte à decisão), identificando tendências, limitações metodológicas, requisitos de dados/hardware e lacunas para adoção clínica. O survey incluirá abordagens \emph{quantum-native} (circuitos variacionais, kernels quânticos, annealing, etc.) e \emph{quantum-inspired} quando explicitamente motivadas por computação quântica. Exclui trabalhos sem aplicação clara em saúde/medicina ou sem descrição metodológica suficiente para comparação.}
+  \item [ ] Definir a pergunta central e 3--6 subperguntas (ex.: ``que tipo de problema médico?'', ``que modelo de quantum?''). \textcolor{blue}{Pergunta central: \emph{De que forma o QML tem sido empregado na medicina e quais são as evidências, limitações e desafios para sua utilidade prática e adoção clínica?} Subperguntas: (1) Quais tarefas médicas são mais frequentes (imagem, genômica, EHR, sinais fisiológicos, descoberta de fármacos)? (2) Quais paradigmas de QML dominam (VQC/QNN, quantum kernels/QSVM, QAOA/annealing, modelos generativos)? (3) Quais estratégias de \emph{data encoding} são usadas e qual o custo/impacto? (4) Em que condições os autores reportam ganhos vs. baselines clássicos e quão justas são as comparações? (5) Que tipo de backend é usado (simulador ideal, simulador com ruído, hardware real) e com quantos qubits/profundidade? (6) Quais barreiras de validação clínica/regulatória e de reprodutibilidade são mais comuns?}
+  \item [ ] Definir o recorte temporal (ex.: 2015--2026) e idiomas aceitos. \textcolor{blue}{Recorte temporal sugerido: 2015--2026 (inclusive), pois cobre a fase NISQ e a explosão recente de VQCs/kernels. Idiomas: inglês como padrão; português/espanhol apenas se publicados em venues indexados e com conteúdo técnico completo.}
+  \item [ ] Definir tipos de publicação aceitos (artigos, preprints, revisões, white papers). \textcolor{blue}{Aceitar: artigos revisados por pares (journals e conferências), \emph{preprints} (arXiv/medRxiv) quando forem tecnicamente completos, e capítulos de livro técnicos. Revisões existentes podem ser incluídas apenas para contextualização (estado da arte do próprio survey). Excluir: white papers comerciais sem detalhes técnicos, pôsteres/short abstracts sem método, slides.}
+  \item [ ] Definir critérios de inclusão (ex.: aplicação explícita em medicina/saúde; avaliação/experimento; clareza metodológica). \textcolor{blue}{Incluir se: (i) houver aplicação explícita a um problema de saúde/medicina (ou dado biomédico/clinicamente relevante); (ii) descrever claramente o modelo quântico/encoding e pipeline experimental; (iii) reportar avaliação quantitativa (métricas e/ou comparação) ou estudo metodológico com experimento; (iv) indicar dados/dataset (público ou privado, com descrição) e split/validação; (v) permitir identificar backend (simulação/hardware) e configuração (qubits, profundidade).}
+  \item [ ] Definir critérios de exclusão (ex.: apenas proposta vaga; sem relação com medicina; duplicatas; slides). \textcolor{blue}{Excluir se: (i) apenas menciona ``healthcare'' sem tarefa/dado; (ii) não apresenta experimento nem configuração mínima do circuito; (iii) duplicata (mesmo trabalho em arXiv e depois journal: manter a versão final, registrando a relação); (iv) não tem texto completo disponível; (v) é puramente de criptografia/PQC sem componente de ML (a menos que o escopo depois inclua segurança em saúde).}
+  \item [ ] Preparar lista inicial de palavras-chave (quantum + medicina + sinônimos) e combinações booleanas. \textcolor{blue}{Bloco QML: (``quantum machine learning'' OR QML OR ``variational quantum'' OR VQC OR QNN OR ``quantum neural network'' OR ``quantum kernel'' OR QSVM OR ``quantum support vector'' OR ``quantum circuit'' OR ``parameterized quantum circuit'' OR PQC OR ``quantum annealing'' OR QAOA OR ``quantum classifier''). Bloco Saúde: (medicine OR medical OR healthcare OR clinical OR diagnosis OR prognosis OR radiology OR imaging OR MRI OR CT OR ultrasound OR pathology OR histopathology OR ECG OR EEG OR genomics OR proteomics OR bioinformatics OR ``electronic health record'' OR EHR OR drug OR pharmacology). Combinações: (QML-bloco) AND (Saúde-bloco). Para bases que aceitam, usar filtros por ano e área.}
+  \item [ ] Definir um conjunto de ``papers semente'' (5--15) para calibrar escopo e termos. \textcolor{red}{A definir}
+  \item [ ] Criar um protocolo simples (1 página) para repetir a busca e registrar decisões. \textcolor{blue}{Protocolo: (1) bases e datas de busca; (2) strings completas por base; (3) critérios de inclusão/exclusão + exemplos; (4) fluxo de deduplicação (DOI/arXiv ID/título+ano); (5) etapas de triagem (título/resumo → texto completo) com registro de motivo de exclusão; (6) campos de extração padronizados; (7) plano de atualização (ex.: repetir busca a cada 3 meses até submissão).}
+\end{itemize}
+
+\subsection{Levantamento bibliográfico sistemático (arXiv, IEEE, Springer, PubMed)}
+\begin{itemize}
+  \item [ ] Escolher um gerenciador de referências (Bib\TeX{}, Zotero, Mendeley) e padronizar campos mínimos (título, autores, ano, venue, DOI/arXiv, link, notas).
+  \item [ ] Definir as bases-alvo (arXiv, IEEE Xplore, SpringerLink, PubMed) e o que cada uma cobre.
+  \item [ ] Montar strings de busca por base (adaptando sintaxe) e salvar cada versão.
+  \item [ ] Executar busca piloto (20--50 resultados) para checar ruído vs. cobertura.
+  \item [ ] Rodar busca completa por base e exportar resultados (CSV/Bib\TeX{} quando possível).
+  \item [ ] Consolidar tudo em uma única planilha/lista e remover duplicatas.
+  \item [ ] Fazer triagem por título/resumo (marcar: incluir / talvez / excluir + motivo).
+  \item [ ] Baixar PDFs dos incluídos (ou registrar acesso) e garantir nomes padronizados.
+  \item [ ] Registrar versão/data da busca (para reprodutibilidade).
+\end{itemize}
+
+\subsection{Classificação dos trabalhos e análise por subárea}
+\begin{itemize}
+  \item [ ] Definir taxonomia (categorias) antes de rotular tudo (e.g.:
+    \emph{problema médico}, \emph{tipo de dado}, \emph{algoritmo quântico}, \emph{hardware/simulador}, \emph{métrica de avaliação}).
+  \item [ ] Definir rótulos para ``nível de maturidade'' (conceitual, simulação, experimento, aplicação clínica).
+  \item [ ] Criar um formulário de extração (campos fixos) para cada paper.
+  \item [ ] Rotular 10 papers e ajustar a taxonomia (itera até estabilizar).
+  \item [ ] Classificar o conjunto completo e gerar tabelas/resumos (contagens por categoria).
+  \item [ ] Identificar clusters (subáreas fortes) e lacunas (subáreas vazias).
+\end{itemize}
+
+\subsection{Análise técnica de algoritmos e arquiteturas quânticas}
+\begin{itemize}
+  \item [ ] Para cada cluster, listar os algoritmos mais recorrentes (ex.: VQE/QAOA/QSVM/quantum kernels/etc.).
+  \item [ ] Extrair detalhes comparáveis: número de qubits, profundidade/circuito, encoding de dados, ruído, backend.
+  \item [ ] Separar resultados em \emph{simulador ideal} vs. \emph{NISQ} vs. \emph{hardware real}.
+  \item [ ] Registrar se há baseline clássico e se a comparação é justa (mesmos dados/mesmas métricas).
+  \item [ ] Montar uma tabela técnica por subárea (``paper → setup → dados → métrica → resultado → limitação'').
+  \item [ ] Anotar reprodutibilidade: código disponível? seeds? dataset público?
+\end{itemize}
+
+\subsection{Mapeamento de limitações e desafios abertos}
+\begin{itemize}
+  \item [ ] Listar limitações recorrentes (ruído, escala de qubits, falta de datasets, custo de encoding, overfitting, etc.).
+  \item [ ] Mapear ameaças à validade (dados pequenos, seleção enviesada, métricas inadequadas).
+  \item [ ] Separar desafios por: (i) algoritmo, (ii) hardware, (iii) dados/medicina, (iv) validação clínica/regulatória.
+  \item [ ] Identificar ``boas práticas'' que poucos trabalhos seguem (e enfatizar no survey).
+  \item [ ] Elaborar um quadro final: \emph{desafio → impacto → possíveis caminhos}.
+\end{itemize}
+
+\subsection{Síntese crítica e redação do artigo de survey}
+\begin{itemize}
+  \item [ ] Criar um esqueleto do artigo (seções e subseções) antes de escrever texto.
+  \item [ ] Escrever 1 parágrafo de contribuição do survey + como ele difere de revisões existentes.
+  \item [ ] Montar 2--4 figuras/tabelas centrais (taxonomia, pipeline, mapa de subáreas, tabela comparativa).
+  \item [ ] Redigir primeiro rascunho por blocos (introdução, método de busca, resultados por subárea, discussão, conclusões).
+  \item [ ] Rodar uma revisão interna: consistência de termos, siglas, e ``storyline''.
+  \item [ ] Revisar bibliografia: completar Bib\TeX{}, checar duplicatas e normalizar venues.
+  \item [ ] Fazer checklist final: limitações do próprio survey + ameaças à validade + plano de atualização.
+\end{itemize}
+
+\section{Dicas do Kelton}
+\begin{itemize}
+  \item \textbf{Evite survey genérico:} hoje muitos venues/revisores rejeitam revisões amplas e pouco focadas; escolha um \textbf{tema bem específico} (ex.: ``QML para detecção de intrusão em redes médicas'' em vez de ``quantum na medicina'').
+  \item \textbf{Strings de busca robustas e não enviesadas:} use AND/OR com sinônimos e termos técnicos (ex.: quantum machine learning, variational quantum, VQC/QNN, quantum kernel/QSVM, QAOA/annealing, NISQ, side-channel, post-quantum/PQC, lattice-based).
+  \item \textbf{Reprodutibilidade da busca:} registrar bases consultadas, data da busca, recorte temporal, tipo de documento, idioma, e a string completa por base.
+  \item \textbf{Deduplicação e exclusões:} explicitar como remove duplicatas (Zotero/Mendeley/script; DOI matching; título+ano) e como registra motivos de exclusão.
+  \item \textbf{Mais avaliativo, menos descritivo:} além de listar estudos, compare-os com critérios comuns (hardware real vs simulação; baseline clássico forte; métricas; datasets; backend; noise model; seeds/variância).
+  \item \textbf{Tabela por estudo/subárea:} padronizar colunas (task: IDS/malware/QKD/PQC/auth; abordagem quântica: VQC/Qkernels/annealing/quantum-inspired; encoding; backend; noise model; baselines; métricas; código/dataset público).
+  \item \textbf{Síntese quantitativa simples:} reportar percentuais (\% em hardware real, \% que reporta noise model, \% com baseline clássico forte, \% com código/dados públicos).
+  \item \textbf{Heatmaps/co-ocorrência com cuidado:} prefira ``co-mention frequency'' a ``synergy/correlation'' e defina regras (leitura manual vs keyword matching; o que conta menção; normalização com Jaccard/PMI, se possível).
+  \item \textbf{Taxonomia em camadas:} separar \emph{famílias} (ML clássico, DL, metaheurísticas, generativos) de \emph{instâncias} (SVM, CNN, Transformer, GA/PSO/DE, GAN/QGAN) para não misturar níveis.
+  \item \textbf{Threat model como classificação:} montar uma matriz (atacante externo/interno; capacidades; superfícies: modelo/protocolo/implementação/infra; objetivos: confidencialidade, evasão, envenenamento, extração, DoS).
+  \item \textbf{Corte o ``discurso geral'':} reduzir trechos muito amplos e aumentar especificidade (quais métricas mínimas, quais benchmarks, quais backends, quais cenários NISQ).
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,105 @@
+%Version 3.1 December 2024
+% See section 11 of the User Manual for version history
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                 %%
+%% Please do not use \input{...} to include other tex files.       %%
+%% Submit your LaTeX manuscript as one .tex document.              %%
+%%                                                                 %%
+%% All additional figures and files should be attached             %%
+%% separately and not embedded in the \TeX\ document itself.       %%
+%%                                                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[pdflatex,bst/sn-mathphys-num]{sn-jnl}
+
+% Pacotes mínimos (adicione outros conforme precisar)
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+
+\begin{document}
+
+
+\title[QML in Medicine]{Quantum Machine Learning in Medicine: A Comprehensive Survey of Methods, Applications, and Clinical Challenges}
+
+\author*[1]{\fnm{Felipe} \sur{Mahlow}}\email{f.mahlow@unesp.br}
+\author[1]{\fnm{Giovanni} \sur{dos Santos Franco}}\email{gs.franco@unesp.br}
+\author[2]{\fnm{Alexandre} \sur{Drinko}}\email{drinkoalexandre@gmail.com}
+\author[2]{\fnm{Iann} \sur{Cunha}}\email{ianncunha@gmail.com}
+\author[2]{\fnm{Jose Bento Ferreira} \sur{Montenegro}}\email{Jose.Montenegro@einstein.br}
+\author[2,3]{\fnm{Ellison Fernando} \sur{Cardoso}}\email{Ellison.Cardoso@einstein.br}
+\author[2]{\fnm{Jose Adenaldo Santos Bittencourt} \sur{Junior}}\email{jose.bittencourt@einstein.br}
+\author[1]{\fnm{Kelton} \sur{Augusto Pontara da Costa}}\email{kelton.costa@einstein.br}
+\author*[1,2]{\fnm{Felipe} \sur{Fanchini}}\email{felipe.fanchini@einstein.br}
+
+\affil[1]{\orgdiv{Faculty of Sciences}, \orgname{São Paulo State University (Unesp)}, \orgaddress{\city{Bauru}, \country{Brazil}}}
+\affil[2]{\orgname{Hospital Israelita Albert Einstein}, \orgaddress{\city{São Paulo}, \country{Brazil}}}
+\affil[3]{\orgdiv{Laboratory of Magnetic Resonance in Neuroradiology (LIM-44)}, \orgname{University of São Paulo Faculty of Medicine Clinics Hospital}, \orgaddress{\city{São Paulo}, \country{Brazil}}}
+
+
+\abstract{
+}
+\keywords{}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+Quantum computing has transitioned from a primarily theoretical discipline to an experimental field shaped by the advent of noisy intermediate-scale quantum (NISQ) devices. In parallel, \emph{quantum machine learning} (QML) has emerged as an active research area that investigates how quantum resources---such as superposition, entanglement, and high-dimensional feature spaces induced by quantum states---may be leveraged to enhance learning pipelines, or to provide alternative inductive biases when compared with classical machine learning. In medicine, where data are heterogeneous (images, signals, omics, and electronic health records), labels are costly, and decisions are high-stakes, these developments have motivated a growing body of work exploring QML for tasks spanning diagnosis, prognosis, patient stratification, biomedical signal interpretation, and drug discovery.
+
+Despite the rapid growth of the literature, the practical value of QML for medical applications remains difficult to assess. Reported results often depend strongly on choices of data encoding, circuit ans\"atze and depth, noise assumptions, and the fairness of classical baselines. Moreover, many studies remain limited to ideal simulators or small-scale experiments, which complicates the extrapolation of conclusions to clinical settings. Consequently, a critical and methodologically grounded synthesis is needed to (i) organize the landscape of QML in medicine, (ii) identify robust patterns in methods and evaluation practices, and (iii) clarify the barriers that currently limit translation beyond proof-of-concept demonstrations.
+
+\subsection{Motivation}\label{sec:motivation}
+
+The motivation for this survey is threefold. First, medical data scarcity, privacy constraints, and distribution shift across institutions frequently limit the deployment of modern data-driven models; QML methods have been proposed as potentially advantageous in data-limited regimes or as compact models with distinct inductive biases. Second, the NISQ era has produced a wide spectrum of methodological approaches---including variational quantum circuits, quantum kernels, and quantum annealing---whose assumptions and computational profiles differ substantially, making direct comparison non-trivial. Third, for clinical relevance, it is essential to scrutinize evaluation protocols, baseline strength, and reproducibility practices, since optimistic conclusions may arise from weak baselines, leakage-prone splits, or unrealistic noise-free simulation settings.
+
+\subsection{Objectives}\label{sec:objectives}
+
+This survey aims to provide a structured and critical overview of how QML is being used in medicine. Specifically, we seek to:
+(i) map medical tasks and data modalities most frequently addressed by QML (e.g., medical imaging, physiological signals such as ECG/EEG, omics and bioinformatics, electronic health records, and drug discovery);
+(ii) categorize the dominant QML paradigms and modeling choices (e.g., variational quantum classifiers/quantum neural networks, quantum kernels and QSVMs, QAOA/annealing-based formulations, and quantum-inspired approaches when explicitly motivated by quantum computing);
+(iii) analyze common data-encoding strategies and discuss their computational and methodological implications;
+(iv) assess the evidence reported in the literature in terms of metrics, fairness of classical comparisons, and the computational setting (ideal simulators, noisy simulators, or real hardware);
+and (v) consolidate recurring limitations and open challenges that must be addressed for realistic clinical adoption.
+
+\subsection{Study Selection Criteria}\label{sec:selection}
+
+To ensure a focused and reproducible survey, we follow explicit inclusion and exclusion criteria. We include studies that (a) address a clearly defined medical/healthcare problem or biomedical dataset; (b) describe the QML method with sufficient detail to identify the model family, the data encoding, and key experimental settings (e.g., qubit count, circuit depth, and backend); and (c) report quantitative evaluation, either as task performance with well-defined metrics and baselines, or as a methodological study with experimental evidence. We consider peer-reviewed journal and conference papers as primary sources, and include technically complete preprints (e.g., arXiv or medRxiv) when they provide full methodological detail.
+
+We exclude works that only mention healthcare in passing without an explicit task or dataset, do not provide a complete methodological description, or present no experimental evidence. When multiple versions of the same study exist (e.g., a preprint later published in a journal), we prioritize the final peer-reviewed version while recording the relationship between versions. We also document the search sources, query strings, date ranges, and deduplication procedures to support transparency and future updates of the review.
+
+Quantum computing has transitioned from a primarily theoretical discipline to an experimental field shaped by the advent of noisy intermediate-scale quantum (NISQ) devices. In parallel, \emph{quantum machine learning} (QML) has emerged as an active research area that investigates how quantum resources---such as superposition, entanglement, and high-dimensional feature spaces induced by quantum states---may be leveraged to enhance learning pipelines, or to provide alternative inductive biases when compared with classical machine learning. In medicine, where data are heterogeneous (images, signals, omics, and electronic health records), labels are costly, and decisions are high-stakes, these developments have motivated a growing body of work exploring QML for tasks spanning diagnosis, prognosis, patient stratification, biomedical signal interpretation, and drug discovery.
+
+Despite the rapid growth of the literature, the practical value of QML for medical applications remains difficult to assess. Reported results often depend strongly on choices of data encoding, circuit ans\"atze and depth, noise assumptions, and the fairness of classical baselines. Moreover, many studies remain limited to ideal simulators or small-scale experiments, which complicates the extrapolation of conclusions to clinical settings. Consequently, a critical and methodologically grounded synthesis is needed to (i) organize the landscape of QML in medicine, (ii) identify robust patterns in methods and evaluation practices, and (iii) clarify the barriers that currently limit translation beyond proof-of-concept demonstrations.
+
+
+\section{Methodology}\label{sec:method}
+
+\section{Results}\label{sec:results}
+
+\section{Conclusion}\label{sec:conclusion}
+
+\section*{Supplementary Information}
+
+\subsection*{Author Contributions}
+
+
+\subsection*{Funding}
+This study was funded by the Fundação de Amparo à Pesquisa do Estado de São Paulo (FAPESP) through Project Nos. 2024/14934-0 (F.M.), 2025/19585-6 (G.S.F.), 2024/19054-8 (A.D.), 2025/00153-9 (I.C.), 2023/12830-0 (K.A.P.C.), and 2023/04987-6 and 2024/00998-6 (F.F.), and by the Conselho Nacional de Desenvolvimento Científico e Tecnológico (CNPq) through Project No. 408884/2024-0 (F.F.).
+
+\section*{Declarations}
+
+\subsection*{Ethics Approval and Consent to Participate}
+This study was conducted in accordance with internationally accepted standards for research integrity and ethical conduct, including the principles of the Declaration of Helsinki. The experiments exclusively used publicly available, fully anonymized datasets. No human participants were directly involved, and no identifiable personal or clinical information was accessed. Therefore, formal ethical approval and informed consent to participate were not required.
+
+\subsection*{Consent for Publication}
+Not applicable. This study does not contain any individual person’s data in any form.
+
+\subsection*{Competing Interests}
+The authors declare that they have no competing interests.
+
+
+\bibliographystyle{sn-aps}
+\bibliography{sn-bibliography}
+
+\end{document}
