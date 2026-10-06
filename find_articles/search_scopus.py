@@ -3,27 +3,11 @@ import time
 
 import requests
 
-from common import normalize_text, write_results
+from common import BLOCK_MED, BLOCK_QML, normalize_text, write_results
 
 
-SCOPUS_QUERIES = [
-    'TITLE-ABS-KEY("quantum machine learning" AND medicine)',
-    'TITLE-ABS-KEY("quantum machine learning" AND medical)',
-    'TITLE-ABS-KEY("quantum machine learning" AND healthcare)',
-    'TITLE-ABS-KEY("variational quantum" AND medicine)',
-    'TITLE-ABS-KEY("quantum neural network" AND medicine)',
-    'TITLE-ABS-KEY("quantum kernel" AND medicine)',
-    'TITLE-ABS-KEY(QSVM AND medicine)',
-    'TITLE-ABS-KEY("quantum support vector machine" AND medicine)',
-    'TITLE-ABS-KEY("quantum circuit" AND medicine)',
-    'TITLE-ABS-KEY("parameterized quantum circuit" AND medicine)',
-    'TITLE-ABS-KEY("quantum annealing" AND medicine)',
-    'TITLE-ABS-KEY(QAOA AND medicine)',
-    'TITLE-ABS-KEY("quantum classifier" AND medicine)',
-    'TITLE-ABS-KEY("quantum machine learning" AND bioinformatics)',
-    'TITLE-ABS-KEY("quantum machine learning" AND genomics)',
-    'TITLE-ABS-KEY("quantum machine learning" AND imaging)',
-]
+# Also usable in the institutional browser's advanced search.
+SCOPUS_QUERIES = [f"TITLE-ABS-KEY(({BLOCK_QML}) AND ({BLOCK_MED}))"]
 
 
 def extract_authors(entry):

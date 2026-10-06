@@ -27,7 +27,7 @@ def normalize_authors(value):
 
 
 def normalize_doi(value):
-    return normalize_text(value).lower()
+    return re.sub(r"^(?:https?://(?:dx\.)?doi\.org/|doi:\s*)", "", normalize_text(value).lower())
 
 
 def infer_source(file_path):
@@ -42,13 +42,13 @@ def infer_source(file_path):
         return "springer"
     if "scopus" in name:
         return "scopus"
-    if "webofscience" in name:
+    if "webofscience" in name or name.startswith("wos_"):
         return "webofscience"
     return name
 
 
 def infer_year(row):
-    for column in ("published", "publication_year", "publication_date", "pubdate"):
+    for column in ("published", "publication_year", "publication_date", "cover_date", "pubdate"):
         value = normalize_text(row.get(column, ""))
         match = re.search(r"(19|20)\d{2}", value)
         if match:
@@ -120,6 +120,9 @@ def load_csv(file_path):
     df["normalized_title"] = df["merged_title"].apply(normalize_title)
     df["normalized_authors"] = df["authors"].apply(normalize_authors)
     df["normalized_doi"] = df["doi"].apply(normalize_doi)
+    if "arxiv_id" in df.columns:
+        df["normalized_arxiv_id"] = df["arxiv_id"].map(
+            lambda value: re.sub(r"v\d+$", "", normalize_text(value)))
     df["unique_key"] = df.apply(build_unique_key, axis=1)
     return df
 
@@ -159,9 +162,11 @@ def merge_csvs():
 
     merged = pd.concat(frames, ignore_index=True, sort=False)
 
+    # Preserve every retrieved version and source before heuristic deduplication.
+    merged.to_csv(BASE_DIR / "merged_QML_medicine_all_records.csv", index=False)
     final_df = merged.copy()
     final_df = dedupe_step(final_df, ["normalized_doi"])
-    final_df = dedupe_step(final_df, ["arxiv_id"])
+    final_df = dedupe_step(final_df, ["normalized_arxiv_id"])
     final_df = dedupe_step(final_df, ["pmid"])
     final_df = dedupe_step(final_df, ["article_number"])
     final_df = dedupe_step(final_df, ["identifier"])

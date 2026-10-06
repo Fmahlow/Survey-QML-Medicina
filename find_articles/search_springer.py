@@ -10,28 +10,22 @@ acumulamos os resultados, deduplicando por DOI/identificador ao final.
 Limite diário (~500 req/dia no plano gratuito)
 -----------------------------------------------
 Cada execução usa no máximo SPRINGER_MAX_REQUESTS requisições no total
-(default 80, ~10 req × 8 sub-queries).  Se quiser continuar de onde parou
-no dia seguinte, basta executar novamente — os resultados existentes são
-mesclados via write_results (deduplicação por identifier/doi).
+(default 80).  Atingir esse limite pode deixar a coleta incompleta. Uma nova execução reinicia
+a paginação e substitui o CSV; não retoma a coleta anterior.
 """
 import os
 import time
 
 import requests
 
-from common import BLOCK_MED, BLOCK_QML, normalize_text, write_results
+from common import BLOCK_MED, QML_GROUPS, normalize_text, write_results
 
 
 # A Springer Meta API gratuita não suporta field tags (title:/keyword:) —
 # a busca é feita em texto livre. Os termos são os mesmos de todas as bases
 # (BLOCK_QML e BLOCK_MED de common.py); apenas divididos em sub-queries
 # menores para evitar erros de query muito longa.
-QML_TERMS = [
-    '"quantum machine learning" OR QML',
-    '"variational quantum" OR VQC OR QNN OR "quantum neural network"',
-    '"quantum kernel" OR QSVM OR "quantum support vector machine" OR "quantum classifier"',
-    '"parameterized quantum circuit" OR PQC OR QAOA OR "quantum annealing"',
-]
+QML_TERMS = QML_GROUPS
 
 SUB_QUERIES = [f"({q}) AND ({BLOCK_MED})" for q in QML_TERMS]
 
@@ -141,7 +135,7 @@ def search_springer(
     for i, query in enumerate(sub_queries, 1):
         if requests_remaining <= 0:
             print(f"[springer] cota total de {max_requests_total} requisições atingida. "
-                  f"Execute novamente amanhã para continuar.")
+                  f"Coleta incompleta; não há retomada automática.")
             break
 
         print(f"[springer] sub-query {i}/{len(sub_queries)}: {query[:80]}…")

@@ -1,11 +1,12 @@
 import argparse
 
-from search_arxiv import search_arxiv
-from search_ieee import search_ieee
-from search_pubmed import search_pubmed
-from search_scopus import search_scopus
-from search_springer import search_springer
-from search_webofscience import search_webofscience
+from common import START_DATE, search_date
+from search_arxiv import QUERY as ARXIV_QUERY, search_arxiv
+from search_ieee import QUERY as IEEE_QUERY, search_ieee
+from search_pubmed import QUERY as PUBMED_QUERY, search_pubmed
+from search_scopus import SCOPUS_QUERIES, search_scopus
+from search_springer import SUB_QUERIES as SPRINGER_QUERIES, search_springer
+from search_webofscience import SUB_QUERIES as WOS_QUERIES, search_webofscience
 
 
 def run_selected_databases(databases):
@@ -31,14 +32,26 @@ def parse_args():
         "--databases",
         nargs="+",
         choices=["arxiv", "ieee", "springer", "pubmed", "scopus", "webofscience"],
-        default=["arxiv", "ieee", "springer", "pubmed", "scopus", "webofscience"],
+        default=["arxiv", "ieee", "springer", "pubmed"],
         help="Selecione quais bases consultar.",
     )
+    parser.add_argument("--show-queries", action="store_true",
+                        help="Exibe strings e recorte sem consultar APIs.")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    if args.show_queries:
+        queries = {"arxiv": [ARXIV_QUERY], "ieee": [IEEE_QUERY],
+                   "springer": SPRINGER_QUERIES, "pubmed": [PUBMED_QUERY],
+                   "scopus": SCOPUS_QUERIES, "webofscience": WOS_QUERIES}
+        print(f"Recorte: {START_DATE} até {search_date()}; aplicar também no navegador.")
+        print("APIs: filtro local por metadados; datas incompletas exigem triagem.")
+        for database in args.databases:
+            for query in queries[database]:
+                print(f"[{database}] {query}")
+        return
     run_selected_databases(args.databases)
 
 

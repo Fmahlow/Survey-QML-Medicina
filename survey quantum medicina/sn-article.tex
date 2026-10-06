@@ -57,16 +57,16 @@ The motivation for this survey is threefold. First, medical data scarcity, priva
 
 This survey aims to provide a structured and critical overview of how QML is being used in medicine. Specifically, we seek to:
 (i) map medical tasks and data modalities most frequently addressed by QML (e.g., medical imaging, physiological signals such as ECG/EEG, omics and bioinformatics, electronic health records, and drug discovery);
-(ii) categorize the dominant QML paradigms and modeling choices (e.g., variational quantum classifiers/quantum neural networks, quantum kernels and QSVMs, QAOA/annealing-based formulations, and quantum-inspired approaches when explicitly motivated by quantum computing);
+(ii) categorize the dominant QML paradigms and modeling choices (e.g., variational quantum classifiers/quantum neural networks, quantum kernels and QSVMs, and QAOA/annealing-based formulations with a machine-learning component);
 (iii) analyze common data-encoding strategies and discuss their computational and methodological implications;
 (iv) assess the evidence reported in the literature in terms of metrics, fairness of classical comparisons, and the computational setting (ideal simulators, noisy simulators, or real hardware);
 and (v) consolidate recurring limitations and open challenges that must be addressed for realistic clinical adoption.
 
 \subsection{Study Selection Criteria}\label{sec:selection}
 
-To ensure a focused and reproducible survey, we follow explicit inclusion and exclusion criteria. We include studies that (a) address a clearly defined medical/healthcare problem or biomedical dataset; (b) describe the QML method with sufficient detail to identify the model family, the data encoding, and key experimental settings (e.g., qubit count, circuit depth, and backend); and (c) report quantitative evaluation, either as task performance with well-defined metrics and baselines, or as a methodological study with experimental evidence. We consider peer-reviewed journal and conference papers as primary sources, and include technically complete preprints (e.g., arXiv or medRxiv) when they provide full methodological detail.
+The planned selection will include studies that (a) address a clearly defined medical task or biomedical dataset; (b) describe a quantum machine-learning method sufficiently to identify its role and assess the reported contribution; and (c) provide empirical evaluation or a demonstrated theoretical result with a clear medical application. Eligible sources will comprise peer-reviewed journal and conference articles, technically complete arXiv preprints, and technical book chapters retained from the original working plan, with publication and peer-review status recorded separately. Full texts must be available in English and fall within the period from 2015 through the effective search cutoff in 2026. Evaluation on ideal simulators, noisy simulators, and real quantum hardware will be eligible. A classical baseline will not be required for inclusion; its presence, adequacy, and fairness will be assessed during extraction and synthesis.
 
-We exclude works that only mention healthcare in passing without an explicit task or dataset, do not provide a complete methodological description, or present no experimental evidence. When multiple versions of the same study exist (e.g., a preprint later published in a journal), we prioritize the final peer-reviewed version while recording the relationship between versions. We also document the search sources, query strings, date ranges, and deduplication procedures to support transparency and future updates of the review.
+The main synthesis will exclude exclusively quantum-inspired methods without a quantum computational component, works that mention medicine only in passing, and vague proposals without empirical evidence or a demonstrated theoretical result. Quantum computing studies without a machine-learning component will also be excluded. Reviews and conceptual proposals may inform contextual discussion but will not count as included primary studies. Related preprint and published versions will be linked, with the final peer-reviewed version prioritized and complementary evidence attributed to its source version. Section~\ref{sec:method} specifies the planned search, screening, and extraction procedures.
 
 Quantum computing has transitioned from a primarily theoretical discipline to an experimental field shaped by the advent of noisy intermediate-scale quantum (NISQ) devices. In parallel, \emph{quantum machine learning} (QML) has emerged as an active research area that investigates how quantum resources---such as superposition, entanglement, and high-dimensional feature spaces induced by quantum states---may be leveraged to enhance learning pipelines, or to provide alternative inductive biases when compared with classical machine learning. In medicine, where data are heterogeneous (images, signals, omics, and electronic health records), labels are costly, and decisions are high-stakes, these developments have motivated a growing body of work exploring QML for tasks spanning diagnosis, prognosis, patient stratification, biomedical signal interpretation, and drug discovery.
 
@@ -74,6 +74,70 @@ Despite the rapid growth of the literature, the practical value of QML for medic
 
 
 \section{Methodology}\label{sec:method}
+
+\subsection{Review design and scope}\label{sec:review-design}
+
+This section specifies the planned protocol for a broad systematic review of QML in medicine. The provisional central question is: \emph{How is QML being applied to medicine, and what evidence supports its utility for the tasks considered?} The analysis will examine medical tasks and data modalities, the role of the quantum component, evaluation conditions, and the strength and limitations of the evidence. The procedures are stated prospectively because the final search log, screening decisions, and included corpus have not yet been consolidated.
+
+The scope will cover diagnosis, prognosis, patient stratification, biomedical data analysis, and stages of drug discovery for which an explicit medical application and supporting evidence are provided. For drug-related studies, the extraction will identify the specific stage, such as molecular-property prediction or candidate screening, and the endpoint evaluated. Performance on an intermediate task will not be interpreted as evidence that a drug has been discovered or clinically validated. Quantum annealing and optimization-based approaches will be eligible only when they contribute to a machine-learning task. Quantum algorithms evaluated through classical simulation will remain eligible because the computational method, rather than the availability of device execution, defines the scope. Mentioning quantum-inspired approaches will not itself trigger exclusion, and no blanket NOT filter for this term will be applied to the retrieval queries.
+
+% TODO(protocol): Confirm the final wording of the central research question.
+% This draft records approved scope decisions, not a completed review.
+
+\subsection{Information sources and search strategy}\label{sec:search-strategy}
+
+The planned sources are arXiv, IEEE Xplore, SpringerLink, PubMed, Scopus, and Web of Science. Scopus and Web of Science searches will use institutional browser access following unsuccessful API access attempts. For each source, the search log will record the interface, search date, exact query or subqueries, searched fields, filters, export format, and any access or retrieval limits. Partial exports or failed requests will be identified explicitly and will not be treated as complete searches.
+
+The existing search scripts and working plan will provide the starting query vocabulary. The strategy combines a QML block with a medical block using AND, with synonyms joined by OR within each block. The QML vocabulary includes quantum machine learning, variational quantum methods, quantum neural networks, quantum kernels, quantum support vector machines, parameterized quantum circuits, quantum annealing, and QAOA. The medical vocabulary spans medicine and healthcare, diagnostic and prognostic tasks, imaging, physiological signals, omics, bioinformatics, electronic health records, and pharmacology. Broad terms and acronyms will be assessed against the eligibility criteria during screening. The revised search code retains the original terms and extends the medical vocabulary to include biomedical and disease terms and specific drug-discovery stages. Database-specific syntax and any subdivision into shorter queries will be documented, with changes to the existing strings retained in a versioned search log.
+
+The eligible publication window will begin on 1 January 2015 and end on the effective search cutoff in 2026, which remains to be recorded. Date filters will be applied through the search interface where supported and checked during screening. Searches performed on different dates will retain their source-specific timestamps. The final report will state the common cutoff and how any updates were handled, rather than treating the entire year 2026 as already covered.
+
+% Original Boolean base from find_articles/common.py (preserved verbatim):
+% BLOCK_QML = "quantum machine learning" OR QML OR "variational quantum" OR VQC OR QNN OR "quantum neural network" OR "quantum kernel" OR QSVM OR "quantum support vector machine" OR "quantum circuit" OR "parameterized quantum circuit" OR PQC OR "quantum annealing" OR QAOA OR "quantum classifier"
+% BLOCK_MED = medicine OR medical OR healthcare OR clinical OR diagnosis OR prognosis OR radiology OR imaging OR MRI OR CT OR ultrasound OR pathology OR histopathology OR ECG OR EEG OR genomics OR proteomics OR bioinformatics OR "electronic health record" OR EHR OR drug OR pharmacology
+% Existing source-specific starting strings: find_articles/search_arxiv.py,
+% search_ieee.py, search_pubmed.py, search_springer.py, search_scopus.py,
+% search_webofscience.py; the revised common.py extends the medical vocabulary
+% while retaining the original terms. Working vocabulary also appears in
+% plano-survey-quantum-medicina.tex. These are not certified executed searches.
+% TODO(search-log): Insert exact executed strings/subqueries for all six sources,
+% including browser adaptations, field restrictions, filters, and export limits.
+% TODO(search-cutoff): Insert effective cutoff YYYY-MM-DD in 2026 and each
+% source's actual search/update dates. Do not substitute this drafting date.
+
+\subsection{Record management and study selection}\label{sec:screening}
+
+Retrieved records will be consolidated while retaining their source identifiers and provenance. Duplicate records will be matched using DOI and arXiv identifiers where available, followed by normalized titles, authors, and publication years. Ambiguous matches will be inspected manually. Records describing the same study across publication versions will be linked rather than counted as independent studies. The final peer-reviewed report will serve as the primary version when available, while additional methods or results from a related preprint will retain their own version-level provenance.
+
+A single reviewer will conduct two sequential screening stages. At the title and abstract stage, records will be marked as include, exclude, or uncertain. Both included and uncertain records will proceed to full-text assessment. The reviewer will then apply the criteria in Section~\ref{sec:selection} to the full text and record the decision and a specific reason for each exclusion. Unresolved eligibility questions will be retained as pending decisions until sufficient information is available, and unavailable full texts will be logged separately from assessed full-text exclusions. This procedure does not provide independent duplicate screening; the resulting risk of selection error will be acknowledged as a limitation of the review.
+
+The selection log will support a flow diagram distinguishing records retrieved by source, duplicates removed, records screened, reports sought and unavailable, full texts assessed, exclusions with reasons, and unique studies included. Related reports and versions will be distinguished from unique studies to prevent double counting.
+
+% TODO(selection): Populate the selection flow and exclusion counts from the
+% completed screening log only. No PRISMA counts are known at this stage.
+
+\subsection{Data extraction and operational classification}\label{sec:extraction}
+
+One extraction form will be maintained per unique study, with linked entries for individual task--dataset combinations and experimental configurations. This structure will preserve differences between results reported within the same article while avoiding inflation of the study count. Each field will include its source version and a locator, such as a page, section, table, figure, or supplementary item. Unreported information will be coded as \emph{not reported}, separately from \emph{not applicable}; neither will be inferred from silence.
+
+The extraction form will cover the following dimensions:
+\begin{itemize}
+    \item \textbf{Study identification and contribution:} title, authors, year, venue, DOI or arXiv identifier, linked versions, peer-review status, and whether the contribution is empirical, theoretical, or both.
+    \item \textbf{Medical task and evidence:} clinical or biomedical objective, data modality, dataset provenance and availability, sample size and unit of analysis, preprocessing, feature selection, train/validation/test partitioning, and validation design. Patient-level separation, class imbalance, and external validation will be recorded when applicable. For theoretical contributions, the demonstrated result, assumptions, access model, and explicit connection to the medical task will be extracted instead of inapplicable experimental fields.
+    \item \textbf{QML method and resources:} model family, function of the quantum component within the pipeline, encoding, circuit or annealing configuration, qubit requirements, depth where applicable, optimizer, simulator or device backend, noise assumptions, measurement shots, and reported computational costs, including data preparation when available.
+    \item \textbf{Comparators and outcomes:} classical and quantum comparators, evaluation metrics, task--dataset-specific results, uncertainty estimates, independent runs and seeds, and the conditions under which improvements or theoretical benefits are claimed. Measurement shots will be recorded separately from independent repetitions of training or evaluation.
+    \item \textbf{Reproducibility and limitations:} availability of code and data, implementation details, reported limitations, and limitations identified from the documented evaluation protocol. Author-stated conclusions and reviewer interpretations will be distinguished.
+\end{itemize}
+
+Operational classification will separate the medical task from the role played by QML, such as classification, feature extraction, kernel estimation, or generative modeling. The location of training or optimization will be recorded independently of the stages executed on quantum hardware. A study with simulated training and device-based inference, for example, will retain both labels. Ideal simulation, noisy simulation, and real-device execution will therefore be coded at the relevant pipeline stage, without treating hardware execution of one stage as evidence of an entire pipeline running on a quantum device. The extraction form and coding definitions will be checked on an initial subset of eligible studies, and subsequent revisions will be documented and applied consistently to previously extracted entries.
+
+\subsection{Evidence appraisal and synthesis}\label{sec:synthesis}
+
+The appraisal will evaluate reporting completeness, validation design, comparator adequacy, resource assumptions, and reproducibility. For empirical studies, it will examine whether preprocessing and model selection are separated from test evaluation, whether splits respect the relevant sampling unit, and whether reported comparisons use comparable datasets, metrics, tuning opportunities, and computational budgets. The absence of a classical baseline will limit comparative interpretation but will not trigger exclusion. For theoretical studies, the analysis will assess the demonstrated claim under its stated assumptions, including data access, encoding costs, and the conditions required for relevance to the medical application.
+
+The synthesis will be descriptive and organized around medical tasks and comparable task--dataset settings. A study-level table will summarize methods, evidence type, execution conditions, evaluation practices, and reproducibility, with separate result entries where a study evaluates multiple tasks or datasets. Any counts or proportions will state their denominator and distinguish studies from task--dataset entries. Peer-reviewed articles and arXiv-only preprints will remain identifiable throughout the synthesis.
+
+Reported performance will be compared only with attention to dataset versions, splits, metrics, and evaluation conditions. No automatic meta-analysis or pooled ranking across heterogeneous tasks is planned. Conclusions will distinguish task-specific feasibility, comparative empirical performance, theoretical guarantees, and evidence relevant to clinical use or computational quantum advantage. Missing methodological information, restricted source access, the English-language restriction, preprint status, and single-reviewer screening will be considered when assessing the limits of the synthesis.
 
 \section{Results}\label{sec:results}
 

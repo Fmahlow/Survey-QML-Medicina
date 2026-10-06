@@ -21,32 +21,15 @@ import time
 
 import requests
 
-from common import normalize_text, write_results
+from common import MED_GROUPS, QML_GROUPS, normalize_text, write_results
 
 
-# WOS Starter API: query com TS= (Topic Search).
-# A API tem limite de tamanho de query — usamos sub-queries curtas e
-# acumulamos os resultados deduplicando por wos_id/doi no final.
-_QML_GROUPS = [
-    '"quantum machine learning" OR QML',
-    '"variational quantum" OR VQC OR QNN OR "quantum neural network"',
-    '"quantum kernel" OR QSVM OR "quantum support vector machine"',
-    '"parameterized quantum circuit" OR PQC OR QAOA OR "quantum classifier"',
-]
-
-_MED_GROUPS = [
-    'medicine OR medical OR healthcare OR clinical',
-    'diagnosis OR prognosis OR radiology OR imaging',
-    'MRI OR CT OR ultrasound OR pathology OR histopathology',
-    'ECG OR EEG OR genomics OR proteomics OR bioinformatics',
-    '"electronic health record" OR EHR OR pharmacology',
-]
-
+# Share coverage with other bases, retaining short sub-queries.
 SUB_QUERIES = [
-    f"({q}) AND ({h})" for q in _QML_GROUPS for h in _MED_GROUPS
+    f"TS=({q}) AND TS=({h})" for q in QML_GROUPS for h in MED_GROUPS
 ]
 
-# Mantemos QUERY para compatibilidade com importações externas
+# Compatibility with external imports.
 QUERY = SUB_QUERIES[0]
 
 
